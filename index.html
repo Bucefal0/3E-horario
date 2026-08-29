@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Horario completo — Grupo 3° E | ES-18</title>
+<style>
+  :root{
+    --azul:#1e3a5f;--azul-claro:#2c5282;--gris-claro:#f4f6f8;--gris:#e2e8f0;--acento:#3182ce;--texto:#1a202c;--mate-bg:#fef3c7;--mate-text:#92400e;--verde:#2f855a;
+    --lunes-bg:#e0edff; --lunes-border:#3b82f6; --lunes-text:#1e40af;
+    --martes-bg:#e5fbe8; --martes-border:#22c55e; --martes-text:#166534;
+    --miercoles-bg:#fff2df; --miercoles-border:#f59e0b; --miercoles-text:#92400e;
+    --jueves-bg:#f4e6ff; --jueves-border:#a855f7; --jueves-text:#6b21a8;
+    --viernes-bg:#ffe3ec; --viernes-border:#ec4899; --viernes-text:#9d174d;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;background:linear-gradient(135deg,#eef2f7,#dbe6f0);color:var(--texto);min-height:100vh;overflow-x:hidden;}
+
+  header{
+    background:linear-gradient(135deg,var(--azul),var(--azul-claro));
+    color:white; padding:20px 16px 22px; text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .btn-principal{
+    order:-1;
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--verde); color:white; text-decoration:none;
+    font-weight:700; font-size:0.85rem; padding:10px 20px; border-radius:999px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.2);
+  }
+  .btn-principal:active{ background:#276749; }
+  header h1{margin:0;font-size:0.95rem;font-weight:400;letter-spacing:0.3px;opacity:0.9;}
+  header h2{margin:0;font-size:2rem;font-weight:800;letter-spacing:0.5px;line-height:1.1;}
+  header p.sub{margin:0;font-size:0.85rem;opacity:0.9;}
+
+  .container{max-width:1000px;margin:0 auto;padding:20px 12px 48px;}
+  .info-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px;}
+  .badge{background:white;border-radius:999px;padding:7px 14px;font-size:0.78rem;font-weight:600;color:var(--azul);box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+
+  .toggle-wrap{ text-align:center; margin-bottom:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .toggle-btn{
+    background:var(--acento); color:white; border:none; font-weight:700;
+    font-size:0.9rem; padding:13px 20px; border-radius:10px; cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    flex:1 1 auto; min-width:150px; min-height:44px;
+  }
+  .toggle-btn:active{ background:var(--azul-claro); }
+  .toggle-btn.dias-btn{ background:#7c3aed; }
+  .toggle-btn.dias-btn:active{ background:#5b21b6; }
+
+  .materias-panel{
+    display:none;
+    background:white; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.1);
+    padding:16px; margin-bottom:16px; text-align:center;
+  }
+  .materias-panel.abierto{ display:block; }
+  .materias-panel h3{ margin:0 0 12px; color:var(--azul); font-size:0.92rem; }
+  .materia-btn{
+    background:var(--gris-claro); color:var(--azul); border:2px solid transparent;
+    font-weight:600; font-size:0.82rem; padding:10px 14px; border-radius:999px;
+    margin:4px; cursor:pointer; min-height:40px;
+  }
+  .materia-btn.activo{ background:var(--azul); color:white; }
+  .materia-btn.activo.es-mate{ background:var(--mate-text); }
+
+  .dia-btn{
+    border:2px solid transparent; font-weight:700; font-size:0.86rem;
+    padding:11px 20px; border-radius:999px; margin:5px; cursor:pointer; min-height:42px;
+  }
+  .dia-btn[data-dia="Lunes"]{ background:var(--lunes-bg); color:var(--lunes-text); }
+  .dia-btn[data-dia="Martes"]{ background:var(--martes-bg); color:var(--martes-text); }
+  .dia-btn[data-dia="Miércoles"]{ background:var(--miercoles-bg); color:var(--miercoles-text); }
+  .dia-btn[data-dia="Jueves"]{ background:var(--jueves-bg); color:var(--jueves-text); }
+  .dia-btn[data-dia="Viernes"]{ background:var(--viernes-bg); color:var(--viernes-text); }
+  .dia-btn.activo{ outline:3px solid currentColor; }
+
+  #filtro-info{
+    text-align:center; font-size:0.85rem; color:var(--azul); font-weight:600;
+    margin-bottom:12px; display:none;
+  }
+  #filtro-info.visible{ display:block; }
+  #limpiar-filtro{
+    background:none; border:1px solid var(--azul); color:var(--azul);
+    font-size:0.76rem; padding:6px 14px; border-radius:999px; margin-left:8px; cursor:pointer;
+    display:inline-block; margin-top:6px; min-height:32px;
+  }
+
+  .leyenda-dias{
+    display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:16px;
+  }
+  .chip-dia{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:0.72rem; font-weight:700; padding:5px 11px; border-radius:999px;
+  }
+  .chip-dia .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .chip-lunes{ background:var(--lunes-bg); color:var(--lunes-text); }
+  .chip-lunes .dot{ background:var(--lunes-border); }
+  .chip-martes{ background:var(--martes-bg); color:var(--martes-text); }
+  .chip-martes .dot{ background:var(--martes-border); }
+  .chip-miercoles{ background:var(--miercoles-bg); color:var(--miercoles-text); }
+  .chip-miercoles .dot{ background:var(--miercoles-border); }
+  .chip-jueves{ background:var(--jueves-bg); color:var(--jueves-text); }
+  .chip-jueves .dot{ background:var(--jueves-border); }
+  .chip-viernes{ background:var(--viernes-bg); color:var(--viernes-text); }
+  .chip-viernes .dot{ background:var(--viernes-border); }
+
+  .table-wrap{background:white;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.1);padding:8px;}
+  table{width:100%;border-collapse:collapse;}
+  th, td{border:1px solid var(--gris);text-align:center;padding:10px 8px;font-size:0.85rem;vertical-align:middle;}
+  thead th{background:var(--azul);color:white;font-weight:600;padding:12px 8px;}
+
+  tr[data-dia="Lunes"]{ background:var(--lunes-bg); border-left:5px solid var(--lunes-border); }
+  tr[data-dia="Lunes"] .dia-col{ color:var(--lunes-text); }
+  tr[data-dia="Martes"]{ background:var(--martes-bg); border-left:5px solid var(--martes-border); }
+  tr[data-dia="Martes"] .dia-col{ color:var(--martes-text); }
+  tr[data-dia="Miércoles"]{ background:var(--miercoles-bg); border-left:5px solid var(--miercoles-border); }
+  tr[data-dia="Miércoles"] .dia-col{ color:var(--miercoles-text); }
+  tr[data-dia="Jueves"]{ background:var(--jueves-bg); border-left:5px solid var(--jueves-border); }
+  tr[data-dia="Jueves"] .dia-col{ color:var(--jueves-text); }
+  tr[data-dia="Viernes"]{ background:var(--viernes-bg); border-left:5px solid var(--viernes-border); }
+  tr[data-dia="Viernes"] .dia-col{ color:var(--viernes-text); }
+
+  .dia-col{font-weight:800;font-size:0.9rem;vertical-align:middle;}
+  .modulo-cell{font-weight:600;color:#334155;font-size:0.78rem;white-space:nowrap;}
+  .hora-sub{font-size:0.68rem;color:#64748b;}
+  .materia-cell{font-weight:600;color:#1e293b;}
+  .materia-cell.clase-mate{background:var(--mate-bg);color:var(--mate-text);font-weight:800;border-radius:6px;}
+  .prof-cell{font-size:0.8rem;color:#334155;}
+  tr.oculto{ display:none; }
+
+  footer{text-align:center;padding:20px 16px;font-size:0.76rem;color:#64748b;}
+  .volver{display:inline-block;margin-top:18px;text-decoration:none;color:var(--azul);font-weight:600;font-size:0.88rem;padding:8px;}
+  .leyenda{font-size:0.74rem;color:#64748b;text-align:center;margin-top:14px;}
+  .leyenda span{display:inline-block;width:11px;height:11px;background:var(--mate-bg);border:1px solid var(--mate-text);border-radius:3px;vertical-align:middle;margin-right:5px;}
+
+  @media (max-width:640px){
+    header h2{font-size:1.6rem;}
+    header h1{font-size:0.82rem;}
+    header p.sub{font-size:0.78rem;}
+    .btn-principal{width:100%; justify-content:center;}
+
+    .table-wrap{ padding:0; background:transparent; box-shadow:none; }
+    table{ border-collapse:separate; }
+    thead{ display:none; }
+    tbody{ display:block; }
+    tr{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      grid-template-areas:
+        "dia dia"
+        "modulo materia"
+        "modulo prof";
+      gap:2px 10px;
+      background:white;
+      border-radius:12px;
+      margin-bottom:10px;
+      padding:12px 14px;
+      border:1px solid var(--gris);
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    }
+    td{ border:none; padding:2px 0; text-align:left; font-size:0.85rem; }
+    .dia-col{
+      grid-area:dia; font-size:0.78rem; font-weight:800;
+      text-transform:uppercase; letter-spacing:0.5px;
+      padding-bottom:6px; margin-bottom:4px; border-bottom:1px dashed currentColor;
+      opacity:0.85;
+    }
+    .modulo-cell{ grid-area:modulo; align-self:center; font-size:0.8rem; }
+    .materia-cell{ grid-area:materia; font-size:0.95rem; align-self:end; }
+    .materia-cell.clase-mate{ display:inline-block; padding:3px 8px; }
+    .prof-cell{ grid-area:prof; font-size:0.78rem; align-self:start; }
+  }
+
+  @media (max-width:400px){
+    .toggle-btn{ min-width:auto; font-size:0.85rem; padding:12px 14px; }
+    .materia-btn{ font-size:0.78rem; padding:9px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="btn-principal" href="https://www.es18matematicas.org">🏠 Página principal</a>
+  <h1>Escuela Secundaria Federal ES-18 · Ciclo 2026–2027</h1>
+  <h2>Grupo 3° E</h2>
+  <p class="sub">Horario completo · Tutor: Landa Valle Silvia</p>
+</header>
+
+<div class="container">
+  <div class="info-bar">
+    <span class="badge">👤 Grupo: 3° E</span>
+    <span class="badge">🗓️ Generado: 17/08/2026</span>
+    <span class="badge">📚 Todas las materias</span>
+  </div>
+
+  <div class="toggle-wrap">
+    <button class="toggle-btn" id="toggle-materias">📋 Mostrar por materias</button>
+    <button class="toggle-btn dias-btn" id="toggle-dias">📅 Mostrar por días</button>
+  </div>
+
+  <div class="materias-panel" id="panel-materias">
+    <h3>Selecciona una materia para ver sus días y horarios:</h3>
+    <button class="materia-btn" data-materia="Artes (Danza)">Artes (Danza)</button>
+    <button class="materia-btn" data-materia="Educación Física">Educación Física</button>
+    <button class="materia-btn" data-materia="Español">Español</button>
+    <button class="materia-btn" data-materia="F. C. y É.">F. C. y É.</button>
+    <button class="materia-btn" data-materia="Historia">Historia</button>
+    <button class="materia-btn" data-materia="Inglés">Inglés</button>
+    <button class="materia-btn" data-materia="Integración curricular">Integración curricular</button>
+    <button class="materia-btn es-mate" data-materia="Matemáticas">Matemáticas</button>
+    <button class="materia-btn" data-materia="Química">Química</button>
+    <button class="materia-btn" data-materia="Tec-Informática">Tec-Informática</button>
+    <button class="materia-btn" data-materia="Tutoría">Tutoría</button>
+  </div>
+
+  <div class="materias-panel" id="panel-dias">
+    <h3>Selecciona un día para ver todas sus clases:</h3>
+    <button class="dia-btn" data-dia="Lunes">Lunes</button>
+    <button class="dia-btn" data-dia="Martes">Martes</button>
+    <button class="dia-btn" data-dia="Miércoles">Miércoles</button>
+    <button class="dia-btn" data-dia="Jueves">Jueves</button>
+    <button class="dia-btn" data-dia="Viernes">Viernes</button>
+  </div>
+
+  <div id="filtro-info"></div>
+
+  <div class="leyenda-dias" id="leyenda-dias">
+    <span class="chip-dia chip-lunes"><span class="dot"></span>Lunes</span>
+    <span class="chip-dia chip-martes"><span class="dot"></span>Martes</span>
+    <span class="chip-dia chip-miercoles"><span class="dot"></span>Miércoles</span>
+    <span class="chip-dia chip-jueves"><span class="dot"></span>Jueves</span>
+    <span class="chip-dia chip-viernes"><span class="dot"></span>Viernes</span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="tabla-horario">
+      <thead>
+        <tr>
+          <th>Día</th>
+          <th>Módulo / Hora</th>
+          <th>Materia</th>
+          <th>Profesor(a)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-materia="Español" data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 1<br><span class="hora-sub">08:00–08:50</span></td><td class="materia-cell">Español</td><td class="prof-cell">Profesora Claudia</td></tr>
+        <tr data-materia="F. C. y É." data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 2<br><span class="hora-sub">08:50–09:40</span></td><td class="materia-cell">F. C. y É.</td><td class="prof-cell">Profesora Mirna</td></tr>
+        <tr data-materia="Educación Física" data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 3<br><span class="hora-sub">09:40–10:40</span></td><td class="materia-cell">Educación Física</td><td class="prof-cell">Profesor Luis Alberto</td></tr>
+        <tr data-materia="Matemáticas" data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 4<br><span class="hora-sub">10:40–11:40</span></td><td class="materia-cell clase-mate">Matemáticas</td><td class="prof-cell">Profesor Juan Alberto</td></tr>
+        <tr data-materia="Historia" data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 5<br><span class="hora-sub">11:40–12:40</span></td><td class="materia-cell">Historia</td><td class="prof-cell">Profesora Silvia</td></tr>
+        <tr data-materia="Inglés" data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 6<br><span class="hora-sub">12:40–13:30</span></td><td class="materia-cell">Inglés</td><td class="prof-cell">Profesora Coral</td></tr>
+        <tr data-materia="Tec-Informática" data-dia="Lunes"><td class="dia-col">Lunes</td><td class="modulo-cell">Módulo 7<br><span class="hora-sub">13:30–14:20</span></td><td class="materia-cell">Tec-Informática</td><td class="prof-cell">Profesora Diana</td></tr>
+
+        <tr data-materia="F. C. y É." data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 1<br><span class="hora-sub">08:00–08:50</span></td><td class="materia-cell">F. C. y É.</td><td class="prof-cell">Profesora Mirna</td></tr>
+        <tr data-materia="Química" data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 2<br><span class="hora-sub">08:50–09:40</span></td><td class="materia-cell">Química</td><td class="prof-cell">Profesora Ivonne</td></tr>
+        <tr data-materia="Química" data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 3<br><span class="hora-sub">09:40–10:40</span></td><td class="materia-cell">Química</td><td class="prof-cell">Profesora Ivonne</td></tr>
+        <tr data-materia="Historia" data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 4<br><span class="hora-sub">10:40–11:40</span></td><td class="materia-cell">Historia</td><td class="prof-cell">Profesora Silvia</td></tr>
+        <tr data-materia="Español" data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 5<br><span class="hora-sub">11:40–12:40</span></td><td class="materia-cell">Español</td><td class="prof-cell">Profesora Claudia</td></tr>
+        <tr data-materia="Artes (Danza)" data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 6<br><span class="hora-sub">12:40–13:30</span></td><td class="materia-cell">Artes (Danza)</td><td class="prof-cell">Profesor Luis Alonso</td></tr>
+        <tr data-materia="Matemáticas" data-dia="Martes"><td class="dia-col">Martes</td><td class="modulo-cell">Módulo 7<br><span class="hora-sub">13:30–14:20</span></td><td class="materia-cell clase-mate">Matemáticas</td><td class="prof-cell">Profesor Juan Alberto</td></tr>
+
+        <tr data-materia="Integración curricular" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 1<br><span class="hora-sub">08:00–08:50</span></td><td class="materia-cell">Integración curricular</td><td class="prof-cell">Profesora Cristina</td></tr>
+        <tr data-materia="Matemáticas" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 2<br><span class="hora-sub">08:50–09:40</span></td><td class="materia-cell clase-mate">Matemáticas</td><td class="prof-cell">Profesor Juan Alberto</td></tr>
+        <tr data-materia="Educación Física" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 3<br><span class="hora-sub">09:40–10:40</span></td><td class="materia-cell">Educación Física</td><td class="prof-cell">Profesor Luis Alberto</td></tr>
+        <tr data-materia="Historia" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 4<br><span class="hora-sub">10:40–11:40</span></td><td class="materia-cell">Historia</td><td class="prof-cell">Profesora Silvia</td></tr>
+        <tr data-materia="Artes (Danza)" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 5<br><span class="hora-sub">11:40–12:40</span></td><td class="materia-cell">Artes (Danza)</td><td class="prof-cell">Profesor Luis Alonso</td></tr>
+        <tr data-materia="Tec-Informática" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 6<br><span class="hora-sub">12:40–13:30</span></td><td class="materia-cell">Tec-Informática</td><td class="prof-cell">Profesora Diana</td></tr>
+        <tr data-materia="Español" data-dia="Miércoles"><td class="dia-col">Miércoles</td><td class="modulo-cell">Módulo 7<br><span class="hora-sub">13:30–14:20</span></td><td class="materia-cell">Español</td><td class="prof-cell">Profesora Claudia</td></tr>
+
+        <tr data-materia="Química" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 1<br><span class="hora-sub">08:00–08:50</span></td><td class="materia-cell">Química</td><td class="prof-cell">Profesora Ivonne</td></tr>
+        <tr data-materia="Matemáticas" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 2<br><span class="hora-sub">08:50–09:40</span></td><td class="materia-cell clase-mate">Matemáticas</td><td class="prof-cell">Profesor Juan Alberto</td></tr>
+        <tr data-materia="Tec-Informática" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 3<br><span class="hora-sub">09:40–10:40</span></td><td class="materia-cell">Tec-Informática</td><td class="prof-cell">Profesora Diana</td></tr>
+        <tr data-materia="Química" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 4<br><span class="hora-sub">10:40–11:40</span></td><td class="materia-cell">Química</td><td class="prof-cell">Profesora Ivonne</td></tr>
+        <tr data-materia="Artes (Danza)" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 5<br><span class="hora-sub">11:40–12:40</span></td><td class="materia-cell">Artes (Danza)</td><td class="prof-cell">Profesor Luis Alonso</td></tr>
+        <tr data-materia="Inglés" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 6<br><span class="hora-sub">12:40–13:30</span></td><td class="materia-cell">Inglés</td><td class="prof-cell">Profesora Coral</td></tr>
+        <tr data-materia="Español" data-dia="Jueves"><td class="dia-col">Jueves</td><td class="modulo-cell">Módulo 7<br><span class="hora-sub">13:30–14:20</span></td><td class="materia-cell">Español</td><td class="prof-cell">Profesora Claudia</td></tr>
+
+        <tr data-materia="Historia" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 1<br><span class="hora-sub">08:00–08:50</span></td><td class="materia-cell">Historia</td><td class="prof-cell">Profesora Silvia</td></tr>
+        <tr data-materia="Inglés" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 2<br><span class="hora-sub">08:50–09:40</span></td><td class="materia-cell">Inglés</td><td class="prof-cell">Profesora Coral</td></tr>
+        <tr data-materia="Química" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 3<br><span class="hora-sub">09:40–10:40</span></td><td class="materia-cell">Química</td><td class="prof-cell">Profesora Ivonne</td></tr>
+        <tr data-materia="Español" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 4<br><span class="hora-sub">10:40–11:40</span></td><td class="materia-cell">Español</td><td class="prof-cell">Profesora Claudia</td></tr>
+        <tr data-materia="Tutoría" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 5<br><span class="hora-sub">11:40–12:40</span></td><td class="materia-cell">Tutoría</td><td class="prof-cell">Profesora Silvia</td></tr>
+        <tr data-materia="Química" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 6<br><span class="hora-sub">12:40–13:30</span></td><td class="materia-cell">Química</td><td class="prof-cell">Profesora Ivonne</td></tr>
+        <tr data-materia="Matemáticas" data-dia="Viernes"><td class="dia-col">Viernes</td><td class="modulo-cell">Módulo 7<br><span class="hora-sub">13:30–14:20</span></td><td class="materia-cell clase-mate">Matemáticas</td><td class="prof-cell">Profesor Juan Alberto</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="leyenda"><span></span> Clases de Matemáticas con el Prof. Juan Alberto Aguirre Espinoza</p>
+
+  <div style="text-align:center;">
+    <a class="volver" href="index_portal_matematicas.html">&larr; Volver al portal</a>
+  </div>
+</div>
+
+<footer>
+  Horario generado a partir del documento escolar oficial · aSc Horarios
+</footer>
+
+<script>
+const toggleMaterias = document.getElementById('toggle-materias');
+const toggleDias = document.getElementById('toggle-dias');
+const panelMaterias = document.getElementById('panel-materias');
+const panelDias = document.getElementById('panel-dias');
+const materiaBtns = document.querySelectorAll('.materia-btn');
+const diaBtns = document.querySelectorAll('.dia-btn');
+const filas = document.querySelectorAll('#tabla-horario tbody tr');
+const filtroInfo = document.getElementById('filtro-info');
+const leyendaDias = document.getElementById('leyenda-dias');
+
+toggleMaterias.addEventListener('click', () => {
+  panelMaterias.classList.toggle('abierto');
+  toggleMaterias.textContent = panelMaterias.classList.contains('abierto') ? '📋 Ocultar materias' : '📋 Mostrar por materias';
+  panelDias.classList.remove('abierto');
+  toggleDias.textContent = '📅 Mostrar por días';
+});
+
+toggleDias.addEventListener('click', () => {
+  panelDias.classList.toggle('abierto');
+  toggleDias.textContent = panelDias.classList.contains('abierto') ? '📅 Ocultar días' : '📅 Mostrar por días';
+  panelMaterias.classList.remove('abierto');
+  toggleMaterias.textContent = '📋 Mostrar por materias';
+});
+
+function mostrarTodo(){
+  filas.forEach(f => f.classList.remove('oculto'));
+  materiaBtns.forEach(b => b.classList.remove('activo'));
+  diaBtns.forEach(b => b.classList.remove('activo'));
+  filtroInfo.classList.remove('visible');
+  filtroInfo.innerHTML = '';
+  leyendaDias.style.display = 'flex';
+}
+
+materiaBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const materia = btn.dataset.materia;
+    const yaActivo = btn.classList.contains('activo');
+
+    if (yaActivo){
+      mostrarTodo();
+      return;
+    }
+
+    materiaBtns.forEach(b => b.classList.remove('activo'));
+    diaBtns.forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+
+    filas.forEach(f => {
+      f.classList.toggle('oculto', f.dataset.materia !== materia);
+    });
+
+    leyendaDias.style.display = 'none';
+    filtroInfo.classList.add('visible');
+    filtroInfo.innerHTML = `Mostrando solo materia: <strong>${materia}</strong><br><button id="limpiar-filtro">Ver horario completo</button>`;
+    document.getElementById('limpiar-filtro').addEventListener('click', mostrarTodo);
+  });
+});
+
+diaBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const dia = btn.dataset.dia;
+    const yaActivo = btn.classList.contains('activo');
+
+    if (yaActivo){
+      mostrarTodo();
+      return;
+    }
+
+    diaBtns.forEach(b => b.classList.remove('activo'));
+    materiaBtns.forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+
+    filas.forEach(f => {
+      f.classList.toggle('oculto', f.dataset.dia !== dia);
+    });
+
+    leyendaDias.style.display = 'none';
+    filtroInfo.classList.add('visible');
+    filtroInfo.innerHTML = `Mostrando solo día: <strong>${dia}</strong><br><button id="limpiar-filtro">Ver horario completo</button>`;
+    document.getElementById('limpiar-filtro').addEventListener('click', mostrarTodo);
+  });
+});
+</script>
+
+</body>
+</html>
